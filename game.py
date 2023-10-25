@@ -3,6 +3,7 @@ import sys
 import random
 import fish
 from settings import *
+import minnow
 
 pygame.init()
 
@@ -17,8 +18,16 @@ seagrass = pygame.image.load("assets/images/seagrass.png").convert()
 sand_top.set_colorkey((0, 0, 0))
 seagrass.set_colorkey((0, 0, 0))
 
-my_fish = fish.Fish(200, 200) # create a new fish
+# create a new fish
+my_fish = fish.Fish(200, 200)
+my_minnows = []
+
+for _ in range(NUM_MINNOWS):
+    my_minnows.append(minnow.Minnow(random.randint(0, SCREEN_WIDTH-TILE_SIZE),
+                                    random.randint(0, WATER_BOTTOM-TILE_SIZE)))
+
 background = screen.copy()
+clock = pygame.time.Clock()
 
 
 def draw_background():
@@ -45,20 +54,46 @@ def draw_background():
 draw_background()
 
 while True:
+    # listen for events
     for event in pygame.event.get():
 
         if event.type == pygame.QUIT:
             print("thank fo play")
             pygame.quit()
             sys.exit()
-        if event.type == pygame.KEYDOWN:
+        elif event.type == pygame.KEYDOWN:
             if event.key == pygame.K_LEFT:
-                my_fish.move_left()
+                my_fish.moving_left = True
                 print('left arrow pressed!')
             if event.key == pygame.K_RIGHT:
-                my_fish.move_right()
+                my_fish.moving_right = True
                 print('right arrow pressed!')
-    # update the game screen
+            if event.key == pygame.K_UP:
+                my_fish.moving_up = True
+            if event.key == pygame.K_DOWN:
+                my_fish.moving_down = True
+        elif event.type == pygame.KEYUP:
+            if event.key == pygame.K_LEFT:
+                my_fish.moving_left = False
+                print('left arrow pressed!')
+            if event.key == pygame.K_RIGHT:
+                my_fish.moving_right = False
+                print('right arrow pressed!')
+            if event.key == pygame.K_UP:
+                my_fish.moving_up = False
+            if event.key == pygame.K_DOWN:
+                my_fish.moving_down = False
+
+
+# update the game screen
+    my_fish.update()
+    for my_minnow in my_minnows:
+        my_minnow.update()
+
+# draw the game screen
     screen.blit(background, (0, 0))
     my_fish.draw(screen)
+    for my_minnow in my_minnows:
+        my_minnow.draw(screen)
     pygame.display.flip()
+    clock.tick(60)
